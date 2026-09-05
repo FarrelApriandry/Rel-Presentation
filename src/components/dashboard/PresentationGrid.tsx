@@ -72,54 +72,55 @@ export default function PresentationGrid({ refreshTrigger }: PresentationGridPro
 
   if (presentations.length === 0) return (
     <div className="flex flex-col items-center justify-center gap-3 py-20">
-      <div className="flex h-16 w-16 items-center justify-center"
-        style={{ backgroundColor: 'var(--surface-muted)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)' }}>
+      <div className="flex h-16 w-16 items-center justify-center rounded-xl"
+        style={{ backgroundColor: 'var(--surface-card)', border: '1px solid var(--border-color)' }}>
         <ExternalLink size={24} style={{ color: 'var(--text-muted)' }} />
       </div>
-      <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No presentations yet. Upload your first deck.</p>
+      <p className="text-sm" style={{ color: 'var(--text-sub)' }}>No presentations yet. Upload your first deck.</p>
     </div>
   );
 // GRID_CONTINUE
   return (
-    <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+    <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
       <AnimatePresence mode="popLayout">
         {presentations.map((pres, i) => (
           <motion.div key={pres.id} custom={i} variants={cardVariants}
             initial="hidden" animate="visible" exit="exit" layout
-            className="group flex flex-col justify-between p-5 transition-all hover:-translate-y-0.5"
+            className="group flex flex-col justify-between rounded-xl p-5 transition-colors"
             style={{
-              backgroundColor: 'var(--surface-card)', border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-subtle)',
+              backgroundColor: 'rgba(24, 24, 27, 0.5)', border: '1px solid var(--border-color)',
+              boxShadow: 'var(--shadow-subtle)',
             }}>
             <div>
               <div className="mb-2 flex items-start justify-between gap-2">
                 <h3 className="text-base font-semibold leading-tight" style={{ color: 'var(--text-main)' }}>{pres.title}</h3>
-                <span className="shrink-0 rounded-full px-2 py-0.5 text-xs font-medium"
+                <span className="shrink-0 rounded-md px-2 py-0.5 text-xs font-medium font-mono"
                   style={{
-                    backgroundColor: pres.is_public ? '#dcfce7' : '#fef3c7',
-                    color: pres.is_public ? '#166534' : '#92400e', borderRadius: '9999px',
+                    backgroundColor: pres.is_public ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                    color: pres.is_public ? '#6ee7b7' : '#fbbf24',
+                    border: `1px solid ${pres.is_public ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
                   }}>{pres.is_public ? 'Public' : 'Private'}</span>
               </div>
-              <p className="mb-1 text-xs" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>/p/{pres.slug}</p>
+              <p className="mb-1 text-xs font-mono" style={{ color: 'var(--text-muted)' }}>/p/{pres.slug}</p>
               {pres.description && <p className="mb-2 text-sm" style={{ color: 'var(--text-sub)' }}>{pres.description}</p>}
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{formatDate(pres.created_at)}</p>
             </div>
             <div className="mt-4 flex items-center gap-2 border-t pt-4" style={{ borderColor: 'var(--border-color)' }}>
               <a href={`/p/${pres.slug}`} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium"
-                style={{ color: 'var(--color-accent)', backgroundColor: 'color-mix(in srgb, var(--color-accent) 8%, transparent)',
-                  borderRadius: 'var(--radius-sm)', textDecoration: 'none' }}>
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium"
+                style={{ color: 'var(--color-accent-text)', backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                  textDecoration: 'none' }}>
                 <Eye size={14} />View</a>
               <button onClick={() => handleCopyLink(pres.slug, pres.id)}
-                className="flex cursor-pointer items-center gap-1.5 px-3 py-1.5 text-xs font-medium"
-                style={{ color: copiedId === pres.id ? '#16a34a' : 'var(--text-sub)',
-                  backgroundColor: copiedId === pres.id ? '#dcfce7' : 'var(--surface-muted)',
-                  borderRadius: 'var(--radius-sm)', border: 'none' }}>
+                className="flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium"
+                style={{ color: copiedId === pres.id ? '#6ee7b7' : 'var(--text-sub)',
+                  backgroundColor: copiedId === pres.id ? 'rgba(16, 185, 129, 0.1)' : 'var(--surface-muted)',
+                  border: 'none' }}>
                 {copiedId === pres.id ? <Check size={14} /> : <Copy size={14} />}
                 {copiedId === pres.id ? 'Copied!' : 'Copy Link'}</button>
               <button onClick={() => handleDelete(pres.id)} disabled={deletingId === pres.id}
-                className="ml-auto flex cursor-pointer items-center gap-1.5 px-3 py-1.5 text-xs font-medium disabled:opacity-50"
-                style={{ color: '#dc2626', backgroundColor: '#fef2f2', borderRadius: 'var(--radius-sm)', border: 'none' }}>
+                className="ml-auto flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                style={{ color: '#fca5a5', backgroundColor: 'rgba(220, 38, 38, 0.1)', border: 'none' }}>
                 {deletingId === pres.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                 Delete</button>
             </div>

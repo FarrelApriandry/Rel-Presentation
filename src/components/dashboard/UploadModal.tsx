@@ -119,7 +119,7 @@ export default function UploadModal({ isOpen, onClose, onUploaded }: UploadModal
     }, [form, onUploaded, onClose, resetForm]);
 
   const inputStyle: React.CSSProperties = {
-    backgroundColor: 'var(--surface-muted)', border: '1px solid var(--border-color)',
+    backgroundColor: 'var(--surface-card)', border: '1px solid var(--border-color)',
     borderRadius: 'var(--radius-sm)', color: 'var(--text-main)',
   };
   const labelStyle: React.CSSProperties = { color: 'var(--text-sub)' };
@@ -130,7 +130,7 @@ export default function UploadModal({ isOpen, onClose, onUploaded }: UploadModal
         <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           variants={overlayVariants} initial="hidden" animate="visible" exit="hidden">
           <div className="absolute inset-0"
-            style={{ backgroundColor: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
+            style={{ backgroundColor: 'rgba(9, 9, 11, 0.8)', backdropFilter: 'blur(4px)' }}
             onClick={handleClose} />
           <motion.div className="relative w-full max-w-lg overflow-y-auto p-6"
             style={{
@@ -139,15 +139,15 @@ export default function UploadModal({ isOpen, onClose, onUploaded }: UploadModal
             }}
             variants={modalVariants} initial="hidden" animate="visible" exit="exit">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-lg font-semibold" style={{ color: 'var(--text-main)' }}>Upload Presentation</h2>
-              <button onClick={handleClose} className="cursor-pointer rounded-lg p-1.5 hover:opacity-70"
-                style={{ color: 'var(--text-muted)', border: 'none', background: 'none' }}>
+              <h2 className="text-lg font-semibold tracking-tight" style={{ color: 'var(--text-main)' }}>Upload Presentation</h2>
+              <button onClick={handleClose} className="cursor-pointer rounded-lg border border-zinc-700 p-1.5 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+                style={{ color: 'var(--text-sub)' }}>
                 <X size={18} />
               </button>
             </div>
             {error && (
               <div className="mb-4 rounded-lg px-4 py-3 text-sm"
-                style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b' }}>
+                style={{ backgroundColor: 'rgba(220, 38, 38, 0.1)', border: '1px solid rgba(220, 38, 38, 0.3)', color: '#fca5a5' }}>
                 {error}
               </div>
             )}
@@ -155,24 +155,23 @@ export default function UploadModal({ isOpen, onClose, onUploaded }: UploadModal
               {/* Dropzone */}
               <div onDrop={handleDrop} onDragOver={handleDragOver} onDragLeave={handleDragLeave}
                 onClick={() => fileInputRef.current?.click()}
-                className="flex cursor-pointer flex-col items-center justify-center gap-2 p-6 transition-colors"
+                className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl p-6 transition-colors"
                 style={{
                   border: `2px dashed ${isDragging ? 'var(--color-accent)' : 'var(--border-color)'}`,
-                  backgroundColor: isDragging ? 'color-mix(in srgb, var(--color-accent) 5%, transparent)' : 'var(--surface-muted)',
-                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: isDragging ? 'rgba(79, 70, 229, 0.05)' : 'var(--surface-card)',
                 }}>
                 <input ref={fileInputRef} type="file" accept=".html,.htm" className="hidden"
                   onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); }} />
                 {form.file ? (
                   <div className="flex items-center gap-2">
-                    <FileText size={20} style={{ color: 'var(--color-accent)' }} />
+                    <FileText size={20} style={{ color: 'var(--color-accent-text)' }} />
                     <span className="text-sm font-medium" style={{ color: 'var(--text-main)' }}>{form.file.name}</span>
                     <span className="text-xs" style={{ color: 'var(--text-muted)' }}>({(form.file.size / 1024).toFixed(1)} KB)</span>
                   </div>
                 ) : (
                   <>
                     <Upload size={24} style={{ color: 'var(--text-muted)' }} />
-                    <span className="text-sm" style={{ color: 'var(--text-muted)' }}>Drag and drop .html file, or click to browse</span>
+                    <span className="text-sm" style={{ color: 'var(--text-sub)' }}>Drag and drop .html file, or click to browse</span>
                     <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Max 10MB</span>
                   </>
                 )}
@@ -180,7 +179,7 @@ export default function UploadModal({ isOpen, onClose, onUploaded }: UploadModal
 {/* PART3 */}
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="title" className="text-sm font-medium" style={labelStyle}>
-                  Title <span style={{ color: '#ef4444' }}>*</span>
+                  Title <span style={{ color: '#f87171' }}>*</span>
                 </label>
                 <input id="title" type="text" required value={form.title}
                   onChange={handleTitleChange} placeholder="My Awesome Presentation"
@@ -188,12 +187,12 @@ export default function UploadModal({ isOpen, onClose, onUploaded }: UploadModal
               </div>
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="slug" className="text-sm font-medium" style={labelStyle}>
-                  Custom Slug <span style={{ color: '#ef4444' }}>*</span>
+                  Custom Slug <span style={{ color: '#f87171' }}>*</span>
                 </label>
                 <div className="flex items-center">
-                  <span className="shrink-0 px-3 py-2.5 text-sm"
+                  <span className="shrink-0 rounded-l-md px-3 py-2.5 text-sm"
                     style={{ backgroundColor: 'var(--surface-muted)', border: '1px solid var(--border-color)',
-                      borderRight: 'none', borderRadius: 'var(--radius-sm) 0 0 var(--radius-sm)', color: 'var(--text-muted)' }}>/p/</span>
+                      borderRight: 'none', color: 'var(--text-muted)' }}>/p/</span>
                   <input id="slug" type="text" required pattern="[a-z0-9\-]+" value={form.slug}
                     onChange={(e) => setForm((prev) => ({ ...prev, slug: e.target.value }))}
                     placeholder="my-presentation" className="flex-1 px-3.5 py-2.5 text-sm outline-none"
@@ -215,12 +214,12 @@ export default function UploadModal({ isOpen, onClose, onUploaded }: UploadModal
               </div>
               <div className="mt-2 flex justify-end gap-3">
                 <button type="button" onClick={handleClose}
-                  className="cursor-pointer px-4 py-2.5 text-sm font-medium transition-colors"
+                  className="cursor-pointer rounded-lg px-4 py-2.5 text-sm font-medium transition-colors"
                   style={{ color: 'var(--text-sub)', backgroundColor: 'transparent',
-                    border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>Cancel</button>
+                    border: '1px solid var(--border-color)' }}>Cancel</button>
                 <button type="submit" disabled={isSubmitting}
-                  className="flex cursor-pointer items-center gap-2 px-4 py-2.5 text-sm font-medium text-white transition-all hover:-translate-y-px disabled:opacity-50"
-                  style={{ backgroundColor: 'var(--color-accent)', borderRadius: 'var(--radius-sm)', border: 'none' }}>
+                  className="flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-colors disabled:opacity-50"
+                  style={{ backgroundColor: 'var(--color-accent)', border: 'none' }}>
                   {isSubmitting ? (<><Loader2 size={16} className="animate-spin" />Uploading...</>) : (<><Upload size={16} />Upload</>)}
                 </button>
               </div>

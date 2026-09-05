@@ -1,21 +1,23 @@
 @import "tailwindcss";
 
-/* ── Design Tokens (DESIGN.md §11) ── */
+/* ── Design Tokens — Dark Zinc/Indigo Theme ── */
 :root {
-  /* Colors - Light */
-  --bg-main: #fafaf9;
-  --surface-card: #ffffff;
-  --surface-muted: #f4f4f5;
-  --border-color: #e4e4e7;
-  --text-main: #18181b;
-  --text-sub: #52525b;
-  --text-muted: #71717a;
-  --color-accent: #2563eb;
-  --color-accent-hover: #1d4ed8;
+  /* Colors — Always Dark */
+  --bg-main: #09090b;                /* zinc-950 */
+  --surface-card: #18181b;           /* zinc-900 */
+  --surface-muted: #27272a;          /* zinc-800 */
+  --border-color: #27272a;           /* zinc-800 */
+  --border-hover: #3f3f46;           /* zinc-700 */
+  --text-main: #f4f4f5;              /* zinc-100 */
+  --text-sub: #a1a1aa;               /* zinc-400 */
+  --text-muted: #71717a;             /* zinc-500 */
+  --color-accent: #4f46e5;           /* indigo-600 */
+  --color-accent-hover: #6366f1;     /* indigo-500 */
+  --color-accent-text: #a5b4fc;      /* indigo-300 */
 
   /* Typography */
-  --font-sans: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'Geist Mono', ui-monospace, 'Cascadia Code', monospace;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   /* Radii */
   --radius-sm: 8px;
@@ -28,22 +30,14 @@
   --container-max: 1280px;
 
   /* Shadow */
-  --shadow-subtle: 0 8px 30px rgba(0, 0, 0, 0.04);
-}
-
-.dark {
-  /* Colors - Dark */
-  --bg-main: #09090b;
-  --surface-card: #111113;
-  --surface-muted: #18181b;
-  --border-color: #27272a;
-  --text-main: #fafafa;
-  --text-sub: #a1a1aa;
-  --text-muted: #71717a;
   --shadow-subtle: 0 8px 30px rgba(0, 0, 0, 0.4);
 }
 
 /* ── Base Styles ── */
+html {
+  scroll-behavior: smooth;
+}
+
 html,
 body {
   margin: 0;
@@ -56,21 +50,21 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Glassmorphism Utility (DESIGN.md §08) ── */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(228, 228, 231, 0.6);
+/* ── Selection ── */
+::selection {
+  background-color: rgba(99, 102, 241, 0.3); /* indigo-500/30 */
 }
 
-.dark .glass-panel {
-  background: rgba(17, 17, 19, 0.7);
-  border: 1px solid rgba(39, 39, 42, 0.6);
+/* ── Glassmorphism Utility ── */
+.glass-panel {
+  background: rgba(24, 24, 27, 0.8); /* zinc-900/80 */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(39, 39, 42, 0.8); /* zinc-800/80 */
 }
 
 /* ── Focus Ring ── */
 *:focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid rgba(99, 102, 241, 0.5); /* indigo-500/50 */
   outline-offset: 2px;
 }

@@ -35,16 +35,16 @@ const email = session.data.user?.email ?? '';
     <header
       class="sticky top-0 z-40"
       style={{
-        backgroundColor: 'color-mix(in srgb, var(--bg-main) 80%, transparent)',
+        backgroundColor: 'rgba(9, 9, 11, 0.8)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: '1px solid var(--border-color)',
+        borderBottom: '1px solid rgba(39, 39, 42, 0.8)',
       }}
     >
       <div class="mx-auto flex items-center justify-between px-6 py-4" style={{ maxWidth: 'var(--container-max)' }}>
-        <h1 class="text-base font-semibold" style={{ color: 'var(--text-main)' }}>AI Deck Presenter</h1>
+        <h1 class="text-base font-semibold tracking-tight" style={{ color: 'var(--text-main)' }}>AI Deck Presenter</h1>
         <div class="flex items-center gap-4">
-          <span class="text-sm" style={{ color: 'var(--text-muted)' }}>{email}</span>
+          <span class="text-sm font-mono" style={{ color: 'var(--text-muted)' }}>{email}</span>
           <a
             href="/api/auth/signout"
             class="text-sm font-medium transition-colors hover:opacity-70"
@@ -57,7 +57,7 @@ const email = session.data.user?.email ?? '';
     <main class="mx-auto px-6 py-8" style={{ maxWidth: 'var(--container-max)' }}>
       <div class="mb-8">
         <h2 class="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-main)' }}>Your Presentations</h2>
-        <p class="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>Manage and share your AI-generated slide decks</p>
+        <p class="mt-1.5 text-sm" style={{ color: 'var(--text-sub)' }}>Manage and share your AI-generated slide decks</p>
       </div>
 
       <DashboardApp client:load />

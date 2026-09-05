@@ -57,7 +57,9 @@ Neutral-first palette. Avoid using gradients across large surfaces.
 | `--color-text-muted-dark` | `#71717A` | Captions and metadata |
 
 ### Primary Accent
-* **Accent Color:** `#2563EB` (Blue) or `#4F46E5` (Indigo)
+* **Accent Color:** `#4F46E5` (Indigo-600)
+* **Accent Hover:** `#6366F1` (Indigo-500)
+* **Accent Text:** `#A5B4FC` (Indigo-300)
 * **Usage Limit:** Max ~5% of visible screen real estate. Use exclusively for CTAs, active states, links, and selected elements.
 
 ---
@@ -69,22 +71,21 @@ Neutral-first palette. Avoid using gradients across large surfaces.
 * Large floating color "blobs" behind every section.
 
 ### ✅ DO
-* Subtle background radial gradients for light ambient depth:
+* Subtle background radial gradients for ambient depth:
 ```css
 background: radial-gradient(
   circle at 70% 20%,
-  rgba(37, 99, 235, 0.08),
+  rgba(79, 70, 229, 0.08),
   transparent 35%
 );
-
 ```
 
 ---
 
 ## 05. Typography System
 
-* **Primary Font:** `Geist` (or `Inter` / `Manrope`)
-* **Technical / Monospace Font:** `Geist Mono` (or `JetBrains Mono` / `IBM Plex Mono`)
+* **Primary Font:** `Inter`
+* **Technical / Monospace Font:** `JetBrains Mono`
 
 ### Type Scale Hierarchy
 
@@ -176,18 +177,11 @@ Glassmorphism must be restricted to overlay utility surfaces (navbars, toolbars,
 
 ```css
 .glass-panel {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(24, 24, 27, 0.8); /* zinc-900/80 */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(228, 228, 231, 0.6);
+  border: 1px solid rgba(39, 39, 42, 0.8); /* zinc-800/80 */
 }
-
-/* Dark Mode Equivalent */
-.dark .glass-panel {
-  background: rgba(17, 17, 19, 0.7);
-  border: 1px solid rgba(39, 39, 42, 0.6);
-}
-
 ```
 
 ---
@@ -225,19 +219,22 @@ Motion must feel responsive, swift, and functional rather than decorative.
 
 ```css
 :root {
-  /* Colors - Light */
-  --bg-main: #fafaf9;
-  --surface-card: #ffffff;
-  --surface-muted: #f4f4f5;
-  --border-color: #e4e4e7;
-  --text-main: #18181b;
-  --text-sub: #52525b;
-  --text-muted: #71717a;
-  --color-accent: #2563eb;
+  /* Colors — Dark Zinc/Indigo Theme */
+  --bg-main: #09090b;                /* zinc-950 */
+  --surface-card: #18181b;           /* zinc-900 */
+  --surface-muted: #27272a;          /* zinc-800 */
+  --border-color: #27272a;           /* zinc-800 */
+  --border-hover: #3f3f46;           /* zinc-700 */
+  --text-main: #f4f4f5;              /* zinc-100 */
+  --text-sub: #a1a1aa;               /* zinc-400 */
+  --text-muted: #71717a;             /* zinc-500 */
+  --color-accent: #4f46e5;           /* indigo-600 */
+  --color-accent-hover: #6366f1;     /* indigo-500 */
+  --color-accent-text: #a5b4fc;      /* indigo-300 */
 
   /* Typography */
-  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'Geist Mono', monospace;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   /* Radii */
   --radius-sm: 8px;
@@ -250,17 +247,5 @@ Motion must feel responsive, swift, and functional rather than decorative.
   --container-max: 1280px;
 
   /* Shadow */
-  --shadow-subtle: 0 8px 30px rgba(0, 0, 0, 0.04);
-}
-
-.dark {
-  /* Colors - Dark */
-  --bg-main: #09090b;
-  --surface-card: #111113;
-  --surface-muted: #18181b;
-  --border-color: #27272a;
-  --text-main: #fafafa;
-  --text-sub: #a1a1aa;
-  --text-muted: #71717a;
   --shadow-subtle: 0 8px 30px rgba(0, 0, 0, 0.4);
 }

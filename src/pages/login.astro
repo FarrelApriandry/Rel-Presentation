@@ -10,12 +10,11 @@ const error = Astro.url.searchParams.get('error');
     style="background-color: var(--bg-main);"
   >
     <div
-      class="w-full max-w-sm rounded-2xl p-8"
+      class="w-full max-w-sm rounded-xl p-8"
       style="
         background-color: var(--surface-card);
         border: 1px solid var(--border-color);
         box-shadow: var(--shadow-subtle);
-        border-radius: var(--radius-lg);
       "
     >
       <div class="mb-8 text-center">
@@ -26,8 +25,8 @@ const error = Astro.url.searchParams.get('error');
           AI Deck Presenter
         </h1>
         <p
-          class="mt-1 text-sm"
-          style="color: var(--text-muted);"
+          class="mt-1.5 text-sm"
+          style="color: var(--text-sub);"
         >
           Sign in to manage your presentations
         </p>
@@ -37,9 +36,9 @@ const error = Astro.url.searchParams.get('error');
         <div
           class="mb-4 rounded-lg px-4 py-3 text-sm"
           style="
-            background-color: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #991b1b;
+            background-color: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            color: #fca5a5;
           "
         >
           {decodeURIComponent(error)}
@@ -64,7 +63,7 @@ const error = Astro.url.searchParams.get('error');
             placeholder="you@example.com"
             class="px-3.5 py-2.5 text-sm outline-none transition-colors"
             style="
-              background-color: var(--surface-muted);
+              background-color: var(--surface-card);
               border: 1px solid var(--border-color);
               border-radius: var(--radius-sm);
               color: var(--text-main);
@@ -89,7 +88,7 @@ const error = Astro.url.searchParams.get('error');
             placeholder="••••••••"
             class="px-3.5 py-2.5 text-sm outline-none transition-colors"
             style="
-              background-color: var(--surface-muted);
+              background-color: var(--surface-card);
               border: 1px solid var(--border-color);
               border-radius: var(--radius-sm);
               color: var(--text-main);
@@ -99,7 +98,7 @@ const error = Astro.url.searchParams.get('error');
 
         <button
           type="submit"
-          class="mt-2 cursor-pointer px-4 py-2.5 text-sm font-medium text-white transition-all hover:-translate-y-px"
+          class="mt-2 cursor-pointer px-4 py-2.5 text-sm font-medium text-white transition-colors"
           style="
             background-color: var(--color-accent);
             border-radius: var(--radius-sm);

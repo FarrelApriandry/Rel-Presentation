@@ -16,10 +16,9 @@ export default function DashboardApp() {
       <div className="mb-6">
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex cursor-pointer items-center gap-2 px-4 py-2.5 text-sm font-medium text-white transition-all hover:-translate-y-px"
+          className="flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-colors"
           style={{
             backgroundColor: 'var(--color-accent)',
-            borderRadius: 'var(--radius-sm)',
             border: 'none',
           }}
         >
