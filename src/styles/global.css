@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+/* ── Design Tokens (DESIGN.md §11) ── */
+:root {
+  /* Colors - Light */
+  --bg-main: #fafaf9;
+  --surface-card: #ffffff;
+  --surface-muted: #f4f4f5;
+  --border-color: #e4e4e7;
+  --text-main: #18181b;
+  --text-sub: #52525b;
+  --text-muted: #71717a;
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+
+  /* Typography */
+  --font-sans: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'Cascadia Code', monospace;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 32px;
+
+  /* Spacing */
+  --space-section: 140px;
+  --container-max: 1280px;
+
+  /* Shadow */
+  --shadow-subtle: 0 8px 30px rgba(0, 0, 0, 0.04);
+}
+
+.dark {
+  /* Colors - Dark */
+  --bg-main: #09090b;
+  --surface-card: #111113;
+  --surface-muted: #18181b;
+  --border-color: #27272a;
+  --text-main: #fafafa;
+  --text-sub: #a1a1aa;
+  --text-muted: #71717a;
+  --shadow-subtle: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Base Styles ── */
+html,
+body {
+  margin: 0;
+  width: 100%;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Glassmorphism Utility (DESIGN.md §08) ── */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(228, 228, 231, 0.6);
+}
+
+.dark .glass-panel {
+  background: rgba(17, 17, 19, 0.7);
+  border: 1px solid rgba(39, 39, 42, 0.6);
+}
+
+/* ── Focus Ring ── */
+*:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
