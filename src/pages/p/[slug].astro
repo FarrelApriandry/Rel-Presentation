@@ -45,19 +45,15 @@ if (!presentation.is_public) {
   }
 }
 
-// Get public URL for the file
-const { data: urlData } = supabase.storage
-  .from('decks')
-  .getPublicUrl(presentation.file_path);
-
-const publicUrl = urlData.publicUrl;
+// Serve HTML through our own API route so Content-Type is correct
+const serveUrl = `/api/presentations/${slug}/serve`;
 const shareUrl = `${Astro.url.origin}/p/${slug}`;
 ---
 
 <Layout title={`${presentation.title} — AI Deck Presenter`}>
   <div class="relative h-screen w-screen overflow-hidden" style="background-color: #000;">
     <iframe
-      src={publicUrl}
+      src={serveUrl}
       title={presentation.title}
       class="h-full w-full border-0"
       sandbox="allow-scripts allow-same-origin allow-popups allow-forms"

@@ -119,10 +119,9 @@ var $$Slug = createComponent(async ($$result, $$props, $$slots) => {
 			return new Response("Presentation not found", { status: 404 });
 		}
 	}
-	const { data: urlData } = supabase.storage.from("decks").getPublicUrl(presentation.file_path);
-	const publicUrl = urlData.publicUrl;
+	const serveUrl = `/api/presentations/${slug}/serve`;
 	const shareUrl = `${Astro.url.origin}/p/${slug}`;
-	return renderTemplate`${renderComponent($$result, "Layout", $$Layout, { "title": `${presentation.title} — AI Deck Presenter` }, { "default": ($$result) => renderTemplate`${maybeRenderHead($$result)}<div class="relative h-screen w-screen overflow-hidden" style="background-color: #000;"><iframe${addAttribute(publicUrl, "src")}${addAttribute(presentation.title, "title")} class="h-full w-full border-0" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" allow="fullscreen"></iframe>${renderComponent($$result, "FloatingControls", FloatingControls, {
+	return renderTemplate`${renderComponent($$result, "Layout", $$Layout, { "title": `${presentation.title} — AI Deck Presenter` }, { "default": ($$result) => renderTemplate`${maybeRenderHead($$result)}<div class="relative h-screen w-screen overflow-hidden" style="background-color: #000;"><iframe${addAttribute(serveUrl, "src")}${addAttribute(presentation.title, "title")} class="h-full w-full border-0" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" allow="fullscreen"></iframe>${renderComponent($$result, "FloatingControls", FloatingControls, {
 		"client:load": true,
 		"shareUrl": shareUrl,
 		"client:component-hydration": "load",
