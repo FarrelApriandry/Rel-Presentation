@@ -38,7 +38,7 @@ export default function DashboardApp() {
           }}
         >
           <Sparkles size={16} />
-          Basic Prompt
+          Prompt Builder
         </button>
       </div>
 
