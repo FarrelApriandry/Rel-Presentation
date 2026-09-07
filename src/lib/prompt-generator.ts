@@ -136,7 +136,7 @@ export function generatePresentationPrompt(data: PresentationFormData): string {
 
   return `You are an expert presentation designer and content strategist specializing in creating polished, insight-driven slide decks. Your task is to generate a complete HTML presentation.
 
-Create a presentation on the topic of **${topic}**.
+Create a presentation on the topic of "**${topic}**".
 
 The presentation should contain ${slideCount} slides. ${structureSection}
 
