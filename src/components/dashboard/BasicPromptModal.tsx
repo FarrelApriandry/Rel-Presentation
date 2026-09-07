@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, X, Copy, Check, RotateCcw, ArrowLeft, Wand2 } from 'lucide-react';
+import { Sparkles, X, Copy, Check, RotateCcw, ArrowLeft, Wand2, Loader2, AlertCircle } from 'lucide-react';
 import {
   type PresentationFormData,
   DEFAULT_FORM_DATA,
@@ -16,6 +16,7 @@ import {
 interface BasicPromptModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onGenerated: (data: { html: string; title: string; slug: string }) => void | Promise<void>;
 }
 
 type Stage = 'configure' | 'preview';
@@ -237,12 +238,14 @@ function PreviewStage({ prompt }: { prompt: string }) {
 
 /* ── Main Modal ── */
 
-export default function BasicPromptModal({ isOpen, onClose }: BasicPromptModalProps) {
+export default function BasicPromptModal({ isOpen, onClose, onGenerated }: BasicPromptModalProps) {
   const [stage, setStage] = useState<Stage>('configure');
   const [form, setForm] = useState<PresentationFormData>({ ...DEFAULT_FORM_DATA });
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [copied, setCopied] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
 
   const update = useCallback(<K extends keyof PresentationFormData>(
     key: K, value: PresentationFormData[K],
@@ -267,17 +270,42 @@ export default function BasicPromptModal({ isOpen, onClose }: BasicPromptModalPr
     } catch {}
   }, [generatedPrompt]);
 
+  const handleGenerateDeck = useCallback(async () => {
+    setIsGenerating(true);
+    setGenerationError(null);
+    try {
+      const res = await fetch('/api/generate-deck', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: generatedPrompt }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Generation failed.');
+      }
+      await onGenerated({ html: data.html, title: data.title, slug: data.slug });
+    } catch (err) {
+      setGenerationError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [generatedPrompt, onGenerated]);
+
   const handleReset = useCallback(() => {
     setForm({ ...DEFAULT_FORM_DATA });
     setGeneratedPrompt('');
     setValidationError(null);
     setCopied(false);
+    setGenerationError(null);
+    setIsGenerating(false);
     setStage('configure');
   }, []);
 
   const handleClose = useCallback(() => {
     setCopied(false);
     setValidationError(null);
+    setGenerationError(null);
+    setIsGenerating(false);
     setStage('configure');
     onClose();
   }, [onClose]);
@@ -340,6 +368,20 @@ export default function BasicPromptModal({ isOpen, onClose }: BasicPromptModalPr
                   <motion.div key="preview"
                     initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 12 }} transition={{ duration: 0.2 }}>
+                    {generationError && (
+                      <div className="mb-3 flex items-start gap-2.5 rounded-lg px-4 py-3 text-sm"
+                        style={{ backgroundColor: 'rgba(220, 38, 38, 0.08)', color: '#fca5a5', border: '1px solid rgba(220, 38, 38, 0.2)' }}>
+                        <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                        <span>{generationError}</span>
+                      </div>
+                    )}
+                    {isGenerating && (
+                      <div className="mb-3 flex items-center gap-2.5 rounded-lg px-4 py-3 text-sm"
+                        style={{ backgroundColor: 'rgba(79, 70, 229, 0.08)', color: '#a5b4fc', border: '1px solid rgba(79, 70, 229, 0.2)' }}>
+                        <Loader2 size={16} className="animate-spin shrink-0" />
+                        <span>Generating presentation with Gemini AI…</span>
+                      </div>
+                    )}
                     <PreviewStage prompt={generatedPrompt} />
                   </motion.div>
                 )}
@@ -370,24 +412,41 @@ export default function BasicPromptModal({ isOpen, onClose }: BasicPromptModalPr
                 </>
               ) : (
                 <>
-                  <button onClick={() => { setStage('configure'); setCopied(false); }}
-                    className="flex cursor-pointer items-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors"
+                  <button onClick={() => { setStage('configure'); setCopied(false); setGenerationError(null); }}
+                    disabled={isGenerating}
+                    className="flex cursor-pointer items-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-50"
                     style={{ color: 'var(--text-sub)', backgroundColor: 'transparent', border: '1px solid var(--border-color)' }}>
                     <ArrowLeft size={16} />Edit
                   </button>
                   <div className="flex gap-3">
                     <button onClick={handleReset}
-                      className="flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
+                      disabled={isGenerating}
+                      className="flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors disabled:opacity-50"
                       style={{ color: 'var(--text-muted)', backgroundColor: 'transparent', border: 'none' }}>
                       <RotateCcw size={14} />Reset
                     </button>
                     <button onClick={handleCopy}
-                      className="flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-colors"
+                      disabled={isGenerating}
+                      className="flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-colors disabled:opacity-50"
                       style={{
                         backgroundColor: copied ? 'rgba(16, 185, 129, 0.8)' : 'var(--color-accent)',
                         border: 'none',
                       }}>
                       {copied ? (<><Check size={16} />Copied!</>) : (<><Copy size={16} />Copy Prompt</>)}
+                    </button>
+                    <button onClick={handleGenerateDeck}
+                      disabled={isGenerating}
+                      className="flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-colors disabled:opacity-50"
+                      style={{
+                        backgroundColor: isGenerating ? 'rgba(79, 70, 229, 0.6)' : '#4f46e5',
+                        border: 'none',
+                      }}>
+                      {isGenerating ? (
+                        <><Loader2 size={16} className="animate-spin" />Generating…
+</>
+                      ) : (
+                        <>✨ Generate Presentation</>
+                      )}
                     </button>
                   </div>
                 </>

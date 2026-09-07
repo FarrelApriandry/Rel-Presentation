@@ -57,7 +57,7 @@ function extractTitleFromHtml(html: string): string | null {
 /**
  * Synthesizes a File object from a cleaned HTML string.
  */
-function synthesizeHtmlFile(cleanedCode: string, filename: string): File {
+export function synthesizeHtmlFile(cleanedCode: string, filename: string): File {
   const htmlBlob = new Blob([cleanedCode], { type: 'text/html' });
   return new File([htmlBlob], filename, { type: 'text/html' });
 }
