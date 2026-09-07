@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { supabase } from '../lib/supabase';
 import DashboardApp from '../components/dashboard/DashboardApp';
 
+const icon = '../../public/RP-Icon/RP-Icon_1x.webp';
 const accessToken = Astro.cookies.get('sb-access-token');
 const refreshToken = Astro.cookies.get('sb-refresh-token');
 
@@ -42,7 +43,10 @@ const email = session.data.user?.email ?? '';
       }}
     >
       <div class="mx-auto flex items-center justify-between px-6 py-4" style={{ maxWidth: 'var(--container-max)' }}>
-        <h1 class="text-base font-semibold tracking-tight" style={{ color: 'var(--text-main)' }}>AI Deck Presenter</h1>
+        <div class="flex items-center gap-2">
+          <img src={icon} alt="AI Deck Presenter Logo" class="h-8" />
+          <h1 class="text-base font-semibold tracking-tight" style={{ color: 'var(--text-main)' }}>AI Deck Presenter</h1>
+        </div>
         <div class="flex items-center gap-4">
           <span class="text-sm font-mono" style={{ color: 'var(--text-muted)' }}>{email}</span>
           <a

@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
+const Icon = '../../public/RP-Icon/RP-Icon_1x.webp'
 const error = Astro.url.searchParams.get('error');
 ---
 
@@ -18,6 +19,11 @@ const error = Astro.url.searchParams.get('error');
       "
     >
       <div class="mb-8 text-center">
+        <img
+          src={Icon}
+          alt="AI Deck Presenter Logo"
+          class="mx-auto mb-4 h-12"
+        />
         <h1
           class="text-2xl font-semibold tracking-tight"
           style="color: var(--text-main);"
