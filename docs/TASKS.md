@@ -1,32 +1,35 @@
-# 🎯 Task: Client-Side Auto-Generated Thumbnail Feature
+# 🎯 Task: Dual-Input Support in UploadModal (File Upload + Raw Code Paste)
 
-**Objective:** Automatically capture a 16:9 WebP thumbnail of the first slide when uploading an HTML presentation, save it to Supabase Storage, and render it on the Dashboard card grid.
+**Objective:** Add a tabbed interface in `UploadModal.tsx` allowing users to either upload an `.html` file or paste raw HTML code directly. Pasted code must be automatically cleaned, converted into a `File` object client-side, and processed through the existing thumbnail & upload pipeline without modifying backend API routes.
 
 ---
 
 ## Task Checklist
 
-### Phase 1: Database & Dependencies Setup
-- [ ] Add `thumbnail_url` column (type `text`, nullable) to the `presentations` table in Supabase.
-- [x] Install `html-to-image` using Bun (`bun add html-to-image`).
+### Phase 1: Input Switcher & Helper Functions (`UploadModal.tsx`)
+- [ ] Add a UI tab switcher at the top of `UploadModal.tsx` to toggle between **Upload File** and **Paste Code** modes.
+- [ ] Implement a code cleaner function `cleanRawHtml(code: string): string`:
+  - Strips markdown code block wrappers (e.g., ````html ... ```` or ```` ... ````).
+  - Trims unnecessary leading/trailing whitespace.
+- [ ] Implement an auto-extract helper for `<title>` tag:
+  - Extract text inside `<title>...</title>` using Regex when code is pasted or changed.
+  - Auto-fill the **Title** and **Slug** input fields if they are currently empty.
 
-### Phase 2: Client Capture & Upload Engine (`UploadModal.tsx`)
-- [ ] Render the uploaded `.html` file inside a hidden/off-screen `<iframe>` when selected in `UploadModal.tsx`.
-- [ ] Implement a helper function using `html-to-image` (`toBlob`) to snapshot the first slide of the iframe as a 1280x720 WebP Blob (`quality: 0.8`).
-- [ ] Append the generated thumbnail blob to the `FormData` as `thumbnail` before submitting to `POST /api/presentations`.
+### Phase 2: Client-Side File Synthesis & Thumbnail Pipeline
+- [ ] Convert the cleaned raw HTML string into a `File` object:
+  ```ts
+  const htmlBlob = new Blob([cleanedCode], { type: 'text/html' });
+  const synthesizedFile = new File([htmlBlob], `${slug || 'presentation'}.html`, { type: 'text/html' });
 
-### Phase 3: API Endpoint Update (`/api/presentations/index.ts`)
-- [ ] Update `POST /api/presentations` to extract the `thumbnail` file from `request.formData()`.
-- [ ] Upload the thumbnail image to Supabase Storage at path: `decks/{user_id}/thumbnails/{slug}.webp`.
-- [ ] Obtain the public URL for the uploaded thumbnail.
-- [ ] Include `thumbnail_url` in the database record insertion into the `presentations` table.
-- [ ] Handle cleanup: if DB insertion fails, delete both the HTML file and thumbnail from Supabase Storage.
+* [ ] Ensure the synthesized `File` is passed into the existing hidden `iframe` (`srcdoc` or `URL.createObjectURL`) for thumbnail snapshot generation.
+* [ ] Seamlessly hook the synthesized `File` and generated thumbnail blob into the existing `FormData` submission to `POST /api/presentations`.
 
-### Phase 4: UI Dashboard Enhancement (`PresentationGrid.tsx`)
-- [ ] Update `PresentationGrid.tsx` card layout to display the thumbnail in an `aspect-video` (16:9) container.
-- [ ] Implement a fallback UI placeholder (clean gradient or icon) if `thumbnail_url` is missing or fails to load.
-- [ ] Apply CSS styles and Framer Motion hover animations conforming to `docs/DESIGN.md` (subtle border shift, slight scale on image hover).
+### Phase 3: UI & UX Enhancements
 
-### Phase 5: Verification & Cleanup
-- [ ] Test uploading a new HTML presentation deck and confirm thumbnail appears on the dashboard.
-- [ ] Verify image delete logic (`DELETE /api/presentations/[id].ts`) removes the thumbnail from storage alongside the `.html` file.
+* [ ] Add a clean monospace `<textarea>` with line-wrapping support for the "Paste Code" tab.
+* [ ] Show a character count or live status indicator when code is pasted.
+* [ ] Maintain consistent dark-theme styling per `docs/DESIGN.md` (subtle borders, focus rings, clear tab active states).
+
+### Phase 4: Verification
+
+* [ ] Run `bun run build` ONCE to verify TypeScript type-checking and production build readiness.
