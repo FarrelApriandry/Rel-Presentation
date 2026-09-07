@@ -40,9 +40,15 @@ export const DELETE: APIRoute = async ({ params, cookies }) => {
   }
 
   // Delete file from storage
+  const filesToRemove = [presentation.file_path];
+  
+  // Also delete thumbnail if it exists
+  const thumbnailPath = `decks/${sessionData.user.id}/thumbnails/${presentation.slug}.webp`;
+  filesToRemove.push(thumbnailPath);
+
   const { error: storageError } = await supabase.storage
     .from('decks')
-    .remove([presentation.file_path]);
+    .remove(filesToRemove);
 
   if (storageError) {
     return new Response(

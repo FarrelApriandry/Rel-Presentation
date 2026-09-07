@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, X, FileText, Loader2 } from 'lucide-react';
+import { toBlob } from 'html-to-image';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -25,7 +26,7 @@ const modalVariants = {
   hidden: { opacity: 0, scale: 0.95, y: 10 },
   visible: {
     opacity: 1, scale: 1, y: 0,
-    transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] },
+    transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] as const },
   },
   exit: {
     opacity: 0, scale: 0.95, y: 10,
@@ -41,11 +42,17 @@ export default function UploadModal({ isOpen, onClose, onUploaded }: UploadModal
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const objectUrlRef = useRef<string | null>(null);
 
   const resetForm = useCallback(() => {
     setForm({ title: '', slug: '', description: '', aiPrompt: '', file: null });
     setError(null);
     setIsSubmitting(false);
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
   }, []);
 
   const handleClose = useCallback(() => {
@@ -74,6 +81,18 @@ export default function UploadModal({ isOpen, onClose, onUploaded }: UploadModal
     }
     setError(null);
     setForm((prev) => ({ ...prev, file }));
+    
+    // Create object URL for thumbnail capture
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+    }
+    const url = URL.createObjectURL(file);
+    objectUrlRef.current = url;
+    
+    // Load HTML into hidden iframe for thumbnail capture
+    if (iframeRef.current) {
+      iframeRef.current.src = url;
+    }
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -89,6 +108,24 @@ export default function UploadModal({ isOpen, onClose, onUploaded }: UploadModal
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault(); setIsDragging(false);
   }, []);
+
+  const captureThumbnail = useCallback(async (): Promise<Blob | null> => {
+    if (!iframeRef.current?.contentDocument?.body) return null;
+    
+    try {
+      const blob = await toBlob(iframeRef.current.contentDocument.body, {
+        type: 'image/webp',
+        quality: 0.8,
+        width: 1280,
+        height: 720,
+        pixelRatio: 1,
+      });
+      return blob;
+    } catch {
+      console.warn('Thumbnail capture failed, continuing without thumbnail');
+      return null;
+    }
+  }, []);
 // CONTINUE
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -99,12 +136,19 @@ export default function UploadModal({ isOpen, onClose, onUploaded }: UploadModal
       }
       setIsSubmitting(true);
       try {
+        // Capture thumbnail before submitting
+        const thumbnailBlob = await captureThumbnail();
+        
         const formData = new FormData();
         formData.append('title', form.title);
         formData.append('slug', form.slug);
         formData.append('description', form.description);
         formData.append('ai_prompt', form.aiPrompt);
         formData.append('file', form.file);
+        
+        if (thumbnailBlob) {
+          formData.append('thumbnail', thumbnailBlob, 'thumbnail.webp');
+        }
         const response = await fetch('/api/presentations', { method: 'POST', body: formData });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || 'Upload failed');
@@ -125,7 +169,17 @@ export default function UploadModal({ isOpen, onClose, onUploaded }: UploadModal
   const labelStyle: React.CSSProperties = { color: 'var(--text-sub)' };
 
   return (
-    <AnimatePresence>
+    <>
+      {/* Hidden iframe for thumbnail capture */}
+      <iframe
+        ref={iframeRef}
+        title="Thumbnail preview"
+        className="pointer-events-none absolute -z-50 opacity-0"
+        style={{ width: 1280, height: 720 }}
+        sandbox="allow-scripts allow-same-origin"
+      />
+      
+      <AnimatePresence>
       {isOpen && (
         <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           variants={overlayVariants} initial="hidden" animate="visible" exit="hidden">
@@ -228,5 +282,6 @@ export default function UploadModal({ isOpen, onClose, onUploaded }: UploadModal
         </motion.div>
       )}
     </AnimatePresence>
+    </>
   );
 }

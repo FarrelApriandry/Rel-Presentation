@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ExternalLink, Copy, Trash2, Check, Eye, Loader2 } from 'lucide-react';
+import { ExternalLink, Copy, Trash2, Check, Eye, Loader2, ImageOff } from 'lucide-react';
 
 interface Presentation {
   id: string;
@@ -10,6 +10,7 @@ interface Presentation {
   is_public: boolean;
   created_at: string;
   file_path: string;
+  thumbnail_url: string | null;
 }
 
 interface PresentationGridProps {
@@ -20,7 +21,7 @@ const cardVariants = {
   hidden: { opacity: 0, y: 12 },
   visible: (i: number) => ({
     opacity: 1, y: 0,
-    transition: { delay: i * 0.05, duration: 0.25, ease: [0.16, 1, 0.3, 1] },
+    transition: { delay: i * 0.05, duration: 0.25, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
   }),
   exit: { opacity: 0, scale: 0.95, transition: { duration: 0.15 } },
 };
@@ -30,6 +31,7 @@ export default function PresentationGrid({ refreshTrigger }: PresentationGridPro
   const [isLoading, setIsLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
   const fetchPresentations = useCallback(async () => {
     try {
@@ -64,6 +66,10 @@ export default function PresentationGrid({ refreshTrigger }: PresentationGridPro
   const formatDate = useCallback((d: string) =>
     new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }), []);
 
+  const handleImageError = useCallback((id: string) => {
+    setFailedImages((prev) => new Set(prev).add(id));
+  }, []);
+
   if (isLoading) return (
     <div className="flex items-center justify-center py-20">
       <Loader2 size={24} className="animate-spin" style={{ color: 'var(--text-muted)' }} />
@@ -86,12 +92,41 @@ export default function PresentationGrid({ refreshTrigger }: PresentationGridPro
         {presentations.map((pres, i) => (
           <motion.div key={pres.id} custom={i} variants={cardVariants}
             initial="hidden" animate="visible" exit="exit" layout
-            className="group flex flex-col justify-between rounded-xl p-5 transition-colors"
+            className="group flex flex-col justify-between overflow-hidden rounded-xl transition-all"
             style={{
               backgroundColor: 'rgba(24, 24, 27, 0.5)', border: '1px solid var(--border-color)',
               boxShadow: 'var(--shadow-subtle)',
-            }}>
-            <div>
+              borderRadius: 16,
+              transition: 'border-color 200ms cubic-bezier(0.16, 1, 0.3, 1), transform 200ms cubic-bezier(0.16, 1, 0.3, 1)',
+            }}
+            whileHover={{ borderColor: 'var(--border-hover)' }}>
+            {/* Thumbnail Preview */}
+            <div className="relative aspect-video w-full overflow-hidden"
+              style={{ 
+                backgroundColor: 'var(--surface-muted)',
+                transition: 'transform 200ms cubic-bezier(0.16, 1, 0.3, 1)',
+              }}>
+              {pres.thumbnail_url && !failedImages.has(pres.id) ? (
+                <img
+                  src={pres.thumbnail_url}
+                  alt={`${pres.title} thumbnail`}
+                  className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
+                  style={{ transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
+                  onError={() => handleImageError(pres.id)}
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center"
+                  style={{ 
+                    background: 'linear-gradient(135deg, #18181B 0%, #27272A 100%)',
+                  }}>
+                  <div className="flex flex-col items-center gap-2" style={{ color: 'var(--text-muted)' }}>
+                    <ImageOff size={24} strokeWidth={1.5} />
+                    <span className="text-xs font-mono">No Preview</span>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="p-5">
               <div className="mb-2 flex items-start justify-between gap-2">
                 <h3 className="text-base font-semibold leading-tight" style={{ color: 'var(--text-main)' }}>{pres.title}</h3>
                 <span className="shrink-0 rounded-md px-2 py-0.5 text-xs font-medium font-mono"
@@ -105,7 +140,7 @@ export default function PresentationGrid({ refreshTrigger }: PresentationGridPro
               {pres.description && <p className="mb-2 text-sm" style={{ color: 'var(--text-sub)' }}>{pres.description}</p>}
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{formatDate(pres.created_at)}</p>
             </div>
-            <div className="mt-4 flex items-center gap-2 border-t pt-4" style={{ borderColor: 'var(--border-color)' }}>
+            <div className="flex items-center gap-2 border-t px-5 py-4" style={{ borderColor: 'var(--border-color)' }}>
               <a href={`/p/${pres.slug}`} target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium"
                 style={{ color: 'var(--color-accent-text)', backgroundColor: 'rgba(79, 70, 229, 0.1)',

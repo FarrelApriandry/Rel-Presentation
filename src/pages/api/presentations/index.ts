@@ -58,6 +58,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   const description = formData.get('description')?.toString() ?? null;
   const aiPrompt = formData.get('ai_prompt')?.toString() ?? null;
   const file = formData.get('file') as File | null;
+  const thumbnail = formData.get('thumbnail') as File | null;
 
   if (!title || !slug || !file) {
     return new Response(
@@ -106,6 +107,29 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     );
   }
 
+  // Upload thumbnail if provided
+  let thumbnailUrl: string | null = null;
+  let thumbnailPath: string | null = null;
+
+  if (thumbnail) {
+    thumbnailPath = `decks/${userId}/thumbnails/${slug}.webp`;
+    const thumbnailBuffer = await thumbnail.arrayBuffer();
+
+    const { error: thumbnailUploadError } = await supabase.storage
+      .from('decks')
+      .upload(thumbnailPath, thumbnailBuffer, {
+        contentType: 'image/webp',
+        upsert: true,
+      });
+
+    if (!thumbnailUploadError) {
+      const { data: publicUrlData } = supabase.storage
+        .from('decks')
+        .getPublicUrl(thumbnailPath);
+      thumbnailUrl = publicUrlData.publicUrl;
+    }
+  }
+
   // Insert metadata into presentations table
   const { data: presentation, error: insertError } = await supabase
     .from('presentations')
@@ -117,13 +141,16 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       file_path: filePath,
       ai_prompt: aiPrompt,
       is_public: true,
+      thumbnail_url: thumbnailUrl,
     })
     .select()
     .single();
 
   if (insertError) {
-    // Clean up uploaded file on DB insert failure
-    await supabase.storage.from('decks').remove([filePath]);
+    // Clean up uploaded files on DB insert failure
+    const filesToRemove = [filePath];
+    if (thumbnailPath) filesToRemove.push(thumbnailPath);
+    await supabase.storage.from('decks').remove(filesToRemove);
     return new Response(
       JSON.stringify({ error: `Database insert failed: ${insertError.message}` }),
       { status: 500 },
