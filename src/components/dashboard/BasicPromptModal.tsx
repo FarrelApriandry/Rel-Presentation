@@ -222,7 +222,7 @@ function ConfigureStage({
 
 function PreviewStage({ prompt }: { prompt: string }) {
   return (
-    <div className="rounded-lg p-4 text-sm leading-relaxed font-mono whitespace-pre-wrap"
+    <div className="modal-scrollbar rounded-lg p-4 text-sm leading-relaxed font-mono whitespace-pre-wrap"
       style={{
         backgroundColor: 'var(--surface-muted)',
         color: 'var(--text-sub)',
@@ -324,7 +324,7 @@ export default function BasicPromptModal({ isOpen, onClose }: BasicPromptModalPr
                 <X size={16} />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto px-6 py-5">
+            <div className="modal-scrollbar flex-1 overflow-y-auto px-6 py-5">
               <AnimatePresence mode="wait">
                 {stage === 'configure' ? (
                   <motion.div key="configure"
