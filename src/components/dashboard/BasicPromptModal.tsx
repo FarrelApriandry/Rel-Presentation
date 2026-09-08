@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, X, Copy, Check, RotateCcw, ArrowLeft, Wand2, Loader2, AlertCircle } from 'lucide-react';
+import { Sparkles, X, Copy, Check, RotateCcw, ArrowLeft, Wand2, Loader2, AlertCircle, Presentation } from 'lucide-react';
 import {
   type PresentationFormData,
   DEFAULT_FORM_DATA,
@@ -445,7 +445,7 @@ export default function BasicPromptModal({ isOpen, onClose, onGenerated }: Basic
                         <><Loader2 size={16} className="animate-spin" />Generating…
 </>
                       ) : (
-                        <>✨ Generate Presentation</>
+                        <> <Presentation size={16} />Generate Presentation</>
                       )}
                     </button>
                   </div>
