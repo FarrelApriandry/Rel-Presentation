@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, X, Copy, Check, RotateCcw, ArrowLeft, Wand2, Loader2, AlertCircle, Presentation } from 'lucide-react';
+import PromptImagesField from './PromptImagesField';
 import {
   type PresentationFormData,
   DEFAULT_FORM_DATA,
@@ -12,6 +13,7 @@ import {
   OUTPUT_FORMAT_OPTIONS,
   generatePresentationPrompt,
 } from '../../lib/prompt-generator';
+// Reference-image uploads are handled by PromptImagesField (signed uploads to Supabase `images` bucket).
 
 interface BasicPromptModalProps {
   isOpen: boolean;
@@ -101,6 +103,7 @@ function TextInput({
 
 function ConfigureStage({
   form, update, showCustomAudience, showCustomLanguage, showCustomStyle, validationError,
+  imagesUploading, onImagesUploading,
 }: {
   form: PresentationFormData;
   update: <K extends keyof PresentationFormData>(key: K, value: PresentationFormData[K]) => void;
@@ -108,6 +111,8 @@ function ConfigureStage({
   showCustomLanguage: boolean;
   showCustomStyle: boolean;
   validationError: string | null;
+  imagesUploading: boolean;
+  onImagesUploading: (busy: boolean) => void;
 }) {
   return (
     <div className="flex flex-col gap-5">
@@ -215,6 +220,21 @@ function ConfigureStage({
           value={form.outputFormat} onChange={(v) => update('outputFormat', v)}
           options={OUTPUT_FORMAT_OPTIONS} />
       </div>
+      <div className="flex flex-col gap-4">
+        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+          Reference Images
+        </span>
+        <PromptImagesField
+          images={form.images ?? []}
+          onChange={(next) => update('images', next)}
+          onBusyChange={onImagesUploading}
+        />
+        {imagesUploading && (
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            Uploads in progress… please wait before generating the prompt.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -240,12 +260,13 @@ function PreviewStage({ prompt }: { prompt: string }) {
 
 export default function BasicPromptModal({ isOpen, onClose, onGenerated }: BasicPromptModalProps) {
   const [stage, setStage] = useState<Stage>('configure');
-  const [form, setForm] = useState<PresentationFormData>({ ...DEFAULT_FORM_DATA });
+  const [form, setForm] = useState<PresentationFormData>({ ...DEFAULT_FORM_DATA, images: [] });
   const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [copied, setCopied] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
+  const [imagesUploading, setImagesUploading] = useState(false);
 
   const update = useCallback(<K extends keyof PresentationFormData>(
     key: K, value: PresentationFormData[K],
@@ -257,10 +278,13 @@ export default function BasicPromptModal({ isOpen, onClose, onGenerated }: Basic
   const handleGenerate = useCallback(() => {
     if (!form.topic.trim()) { setValidationError('Please enter a presentation topic.'); return; }
     if (form.slideCount < 1) { setValidationError('Number of slides must be at least 1.'); return; }
+    if (imagesUploading) { setValidationError('Please wait for image uploads to finish.'); return; }
+    const missingDesc = (form.images ?? []).findIndex((img) => !(img.description || '').trim());
+    if (missingDesc >= 0) { setValidationError(`Please add a description for image ${missingDesc + 1}.`); return; }
     setValidationError(null);
     setGeneratedPrompt(generatePresentationPrompt(form));
     setStage('preview');
-  }, [form]);
+  }, [form, imagesUploading]);
 
   const handleCopy = useCallback(async () => {
     try {
@@ -292,12 +316,13 @@ export default function BasicPromptModal({ isOpen, onClose, onGenerated }: Basic
   }, [generatedPrompt, onGenerated]);
 
   const handleReset = useCallback(() => {
-    setForm({ ...DEFAULT_FORM_DATA });
+    setForm({ ...DEFAULT_FORM_DATA, images: [] });
     setGeneratedPrompt('');
     setValidationError(null);
     setCopied(false);
     setGenerationError(null);
     setIsGenerating(false);
+    setImagesUploading(false);
     setStage('configure');
   }, []);
 
@@ -362,7 +387,9 @@ export default function BasicPromptModal({ isOpen, onClose, onGenerated }: Basic
                       showCustomAudience={showCustomAudience}
                       showCustomLanguage={showCustomLanguage}
                       showCustomStyle={showCustomStyle}
-                      validationError={validationError} />
+                      validationError={validationError}
+                      imagesUploading={imagesUploading}
+                      onImagesUploading={setImagesUploading} />
                   </motion.div>
                 ) : (
                   <motion.div key="preview"

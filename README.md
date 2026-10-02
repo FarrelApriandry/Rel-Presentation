@@ -8,6 +8,7 @@ A full-stack web application for managing and presenting AI-generated HTML slide
 - **Dashboard** — Upload, view, delete, and manage your presentations
 - **Presentation Viewer** — Fullscreen-capable viewer with floating controls and shareable links
 - **Prompt Builder** — Generate structured AI prompts for creating new presentations with customizable topic, audience, language, visual style, and more
+- **Reference Images** — Unlimited PNG/JPG uploads (max 50MB/file) to the Supabase `images` bucket, each with its own description, appended to the master prompt as `detail gambar yang bisa digunakan: 1. {Deskripsi={Link}}`
 - **File Upload** — Drag-and-drop HTML file upload with slug-based routing (max 10 MB)
 - **Public & Private** — Control visibility of each presentation
 
@@ -34,6 +35,7 @@ A full-stack web application for managing and presenting AI-generated HTML slide
 │   ├── components/
 │   │   ├── dashboard/             # Dashboard React components
 │   │   │   ├── BasicPromptModal.tsx
+│   │   │   ├── PromptImagesField.tsx  # Unlimited PNG/JPG upload + per-image description
 │   │   │   ├── DashboardApp.tsx
 │   │   │   ├── Header.tsx
 │   │   │   ├── PresentationGrid.tsx
@@ -43,13 +45,17 @@ A full-stack web application for managing and presenting AI-generated HTML slide
 │   ├── layouts/
 │   │   └── Layout.astro           # Base HTML layout
 │   ├── lib/
-│   │   ├── prompt-generator.ts    # AI prompt generation logic
+│   │   ├── prompt-generator.ts    # AI prompt generation logic (incl. reference images)
+│   │   ├── prompt-images.ts       # PNG/JPG validation + signed-upload helpers
 │   │   └── supabase.ts            # Supabase client initialization
 │   ├── pages/
 │   │   ├── api/
 │   │   │   ├── auth/
 │   │   │   │   ├── login.ts       # POST /api/auth/login
 │   │   │   │   └── signout.ts     # GET /api/auth/signout
+│   │   │   ├── prompt-images/
+│   │   │   │   ├── sign.ts        # POST /api/prompt-images/sign (signed upload URL)
+│   │   │   │   └── delete.ts      # POST /api/prompt-images/delete
 │   │   │   └── presentations/
 │   │   │       ├── index.ts       # GET & POST /api/presentations
 │   │   │       ├── [id].ts        # DELETE /api/presentations/:id
@@ -73,7 +79,7 @@ A full-stack web application for managing and presenting AI-generated HTML slide
 
 - **Node.js** >= 22.12.0
 - **[Bun](https://bun.sh)** (recommended package manager)
-- A **[Supabase](https://supabase.com)** project with Auth, a `presentations` table, and a `decks` storage bucket
+- A **[Supabase](https://supabase.com)** project with Auth, a `presentations` table, plus `decks` and `images` storage buckets (see `supabase/prompt-images-storage.sql` for the `images` RLS setup)
 
 ### Environment Variables
 

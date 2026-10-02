@@ -62,7 +62,10 @@ export const POST: APIRoute = async ({ request }) => {
     'Output ONLY a single, self-contained HTML file — no explanations, no markdown fences, no commentary. ' +
     'The HTML must include all CSS inline (or via a Tailwind CDN <script>), all fonts (e.g. Google Fonts CDN links), ' +
     'and any required JavaScript inline. It must be renderable in any modern browser with zero external dependencies ' +
-    'beyond CDN links embedded in the HTML. Use semantic markup and ensure a 16:9 slide layout.';
+    'beyond CDN links embedded in the HTML. Use semantic markup and ensure a 16:9 slide layout. ' +
+    'If the user prompt lists reference images with URLs, you MUST embed them where relevant with <img> tags ' +
+    'using the exact URLs verbatim in the src attribute (never rewrite, shorten, or base64-encode them), ' +
+    'set meaningful alt text from each image description, and add loading="lazy" plus a sensible max-width style so large photos do not break the slide layout.';
 
   const endpoint =
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;

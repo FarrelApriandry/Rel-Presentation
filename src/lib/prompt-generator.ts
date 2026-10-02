@@ -1,5 +1,12 @@
 /* ── Presentation Prompt Generator ── */
 
+export interface PromptImage {
+  url: string;
+  description: string;
+  name?: string;
+  path?: string;
+}
+
 export interface PresentationFormData {
   topic: string;
   slideCount: number;
@@ -14,6 +21,7 @@ export interface PresentationFormData {
   contentDetail: string;
   specialRequirements: string;
   outputFormat: string;
+  images: PromptImage[];
 }
 
 export const DEFAULT_FORM_DATA: PresentationFormData = {
@@ -30,6 +38,7 @@ export const DEFAULT_FORM_DATA: PresentationFormData = {
   contentDetail: 'balanced',
   specialRequirements: '',
   outputFormat: 'single-html',
+  images: [],
 };
 
 export const AUDIENCE_OPTIONS = [
@@ -131,7 +140,23 @@ export function generatePresentationPrompt(data: PresentationFormData): string {
     : `Distribute the ${slideCount} slides logically — begin with an opening that sets the context, develop the core ideas across the content slides, and close with a meaningful conclusion or call-to-action.`;
 
   const specialSection = data.specialRequirements.trim()
-    ? `\nAdditionally, respect these specific requirements from the presenter:\n${data.specialRequirements.trim()}`
+    ? "\nAdditionally, respect these specific requirements from the presenter:\n" + data.specialRequirements.trim()
+    : '';
+
+  const usableImages = Array.isArray(data.images)
+    ? data.images.filter((img) => img && typeof img.url === 'string' && img.url.trim().length > 0)
+    : [];
+
+  const imagesSection = usableImages.length
+    ? "\n\ndetail gambar yang bisa digunakan:\n" +
+      usableImages
+        .map((img, idx) => {
+          const rawDesc = (img.description || '').trim() || (img.name || '').trim() || ("Reference image " + (idx + 1));
+          const safeDesc = rawDesc.replace(/[{}]/g, '').trim() || ("Reference image " + (idx + 1));
+          return (idx + 1) + ". {" + safeDesc + "={" + img.url.trim() + "}}";
+        })
+        .join("\n") +
+      "\n- Use each image only where it fits the narrative; do not force all images onto a single slide.\n- Never modify, rewrite, or shorten the URLs above. Use them verbatim in the src attribute.\n- Set a meaningful alt attribute from the description."
     : '';
 
   return `You are an expert presentation designer and content strategist specializing in creating polished, insight-driven slide decks. Your task is to generate a complete HTML presentation.
@@ -167,5 +192,5 @@ Technical requirements:
 - Output a single self-contained HTML file with all CSS and content inline.
 - The HTML must be renderable in any modern browser without external dependencies.
 - Ensure the presentation is responsive and works on both projected screens and standard monitors.
-- Structure the HTML cleanly with semantic markup.`;
+- Structure the HTML cleanly with semantic markup.${imagesSection}`;
 }
