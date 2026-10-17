@@ -1,5 +1,7 @@
 /* ── Presentation Prompt Generator ── */
 
+import { type PromptDocument, buildDocumentsSection } from './prompt-documents';
+
 export interface PromptImage {
   url: string;
   description: string;
@@ -22,6 +24,7 @@ export interface PresentationFormData {
   specialRequirements: string;
   outputFormat: string;
   images: PromptImage[];
+  documents: PromptDocument[];
 }
 
 export const DEFAULT_FORM_DATA: PresentationFormData = {
@@ -39,6 +42,7 @@ export const DEFAULT_FORM_DATA: PresentationFormData = {
   specialRequirements: '',
   outputFormat: 'single-html',
   images: [],
+  documents: [],
 };
 
 export const AUDIENCE_OPTIONS = [
@@ -147,6 +151,12 @@ export function generatePresentationPrompt(data: PresentationFormData): string {
     ? data.images.filter((img) => img && typeof img.url === 'string' && img.url.trim().length > 0)
     : [];
 
+  const usableDocs = Array.isArray(data.documents)
+    ? data.documents.filter((doc) => doc && typeof doc.text === 'string' && doc.text.trim().length > 0)
+    : [];
+
+  const documentsSection = buildDocumentsSection(usableDocs);
+
   const imagesSection = usableImages.length
     ? "\n\ndetail gambar yang bisa digunakan:\n" +
       usableImages
@@ -170,7 +180,7 @@ The target audience is ${audience}. The presentation is intended as a ${purpose}
 For the visual direction, adopt a **${visualStyle}** aesthetic. The design should feel intentionally crafted — not templated or generic.${specialSection}
 
 Content depth and narrative quality:
-${contentDepth}
+${contentDepth}${documentsSection}
 
 Quality constraints — apply these principles throughout the presentation:
 - Do not merely summarize or list surface-level points. Understand the context, underlying concepts, evidence, and implications.

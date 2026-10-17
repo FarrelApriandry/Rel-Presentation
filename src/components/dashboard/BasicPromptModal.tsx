@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, X, Copy, Check, RotateCcw, ArrowLeft, Wand2, Loader2, AlertCircle, Presentation } from 'lucide-react';
 import PromptImagesField from './PromptImagesField';
+import PromptDocumentsField from './PromptDocumentsField';
 import {
   type PresentationFormData,
   DEFAULT_FORM_DATA,
@@ -103,7 +104,7 @@ function TextInput({
 
 function ConfigureStage({
   form, update, showCustomAudience, showCustomLanguage, showCustomStyle, validationError,
-  imagesUploading, onImagesUploading,
+  imagesUploading, onImagesUploading, docsUploading, onDocsUploading,
 }: {
   form: PresentationFormData;
   update: <K extends keyof PresentationFormData>(key: K, value: PresentationFormData[K]) => void;
@@ -113,6 +114,8 @@ function ConfigureStage({
   validationError: string | null;
   imagesUploading: boolean;
   onImagesUploading: (busy: boolean) => void;
+  docsUploading: boolean;
+  onDocsUploading: (busy: boolean) => void;
 }) {
   return (
     <div className="flex flex-col gap-5">
@@ -235,6 +238,24 @@ function ConfigureStage({
           </p>
         )}
       </div>
+      <div className="flex flex-col gap-4">
+        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+          Reference Documents
+        </span>
+        <p className="-mt-2 text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+          Upload text-based files (e.g. lecture notes, drafts, requirements) and their content will be parsed and embedded into the prompt as source material.
+        </p>
+        <PromptDocumentsField
+          documents={form.documents ?? []}
+          onChange={(next) => update('documents', next)}
+          onBusyChange={onDocsUploading}
+        />
+        {docsUploading && (
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            Parsing documents… please wait before generating the prompt.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -267,6 +288,7 @@ export default function BasicPromptModal({ isOpen, onClose, onGenerated }: Basic
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [imagesUploading, setImagesUploading] = useState(false);
+  const [docsUploading, setDocsUploading] = useState(false);
 
   const update = useCallback(<K extends keyof PresentationFormData>(
     key: K, value: PresentationFormData[K],
@@ -281,10 +303,11 @@ export default function BasicPromptModal({ isOpen, onClose, onGenerated }: Basic
     if (imagesUploading) { setValidationError('Please wait for image uploads to finish.'); return; }
     const missingDesc = (form.images ?? []).findIndex((img) => !(img.description || '').trim());
     if (missingDesc >= 0) { setValidationError(`Please add a description for image ${missingDesc + 1}.`); return; }
+    if (docsUploading) { setValidationError('Please wait for document parsing to finish.'); return; }
     setValidationError(null);
     setGeneratedPrompt(generatePresentationPrompt(form));
     setStage('preview');
-  }, [form, imagesUploading]);
+  }, [form, imagesUploading, docsUploading]);
 
   const handleCopy = useCallback(async () => {
     try {
@@ -323,6 +346,7 @@ export default function BasicPromptModal({ isOpen, onClose, onGenerated }: Basic
     setGenerationError(null);
     setIsGenerating(false);
     setImagesUploading(false);
+    setDocsUploading(false);
     setStage('configure');
   }, []);
 
@@ -389,7 +413,9 @@ export default function BasicPromptModal({ isOpen, onClose, onGenerated }: Basic
                       showCustomStyle={showCustomStyle}
                       validationError={validationError}
                       imagesUploading={imagesUploading}
-                      onImagesUploading={setImagesUploading} />
+                      onImagesUploading={setImagesUploading}
+                      docsUploading={docsUploading}
+                      onDocsUploading={setDocsUploading} />
                   </motion.div>
                 ) : (
                   <motion.div key="preview"

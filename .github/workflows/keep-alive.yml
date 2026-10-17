@@ -1,0 +1,69 @@
+name: Keep Supabase Alive
+
+# Free-tier Supabase projects pause after 7 days of inactivity.
+# This workflow pings the project's REST endpoint once a day to reset the
+# idle timer and keep the database online. It also runs on demand for a
+# manual test.
+on:
+  schedule:
+    - cron: '27 3 * * *'   # daily 03:27 UTC (~10:27 WIB). Odd minute off the
+                           # top of the hour to dodge GitHub's cron congestion,
+                           # which can silently skip or delay runs.
+  workflow_dispatch:        # allow "Run workflow" from the Actions tab
+
+# One run at a time; a manual run shouldn't stack on a scheduled one.
+concurrency:
+  group: keep-supabase-alive
+  cancel-in-progress: false
+
+permissions:
+  contents: read            # least privilege — we only hit an HTTP endpoint
+
+jobs:
+  ping:
+    name: Ping Supabase REST
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping Supabase (keep project active)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        # Auth: the anon key goes in `apikey`; PostgREST accepts it as the
+        # bearer too. Any authenticated hit counts as activity.
+        #
+        # NOTE: we ping the auth service's /health endpoint, NOT the PostgREST
+        # root (`/rest/v1/`) — that root only answers the service_role key and
+        # would 401 on the anon key. /auth/v1/health needs only the anon key
+        # and stays valid even if the database schema ever changes.
+        #
+        # `--fail-with-body` makes curl exit non-zero on HTTP >= 400 so the
+        # run is marked red if the project is already paused or the secrets
+        # are wrong, instead of silently going green.
+        run: |
+          set -euo pipefail
+
+          if [ -z "${SUPABASE_URL:-}" ] || [ -z "${SUPABASE_ANON_KEY:-}" ]; then
+            echo "::error::SUPABASE_URL / SUPABASE_ANON_KEY secrets are not set."
+            echo "Set them in: Settings -> Secrets and variables -> Actions"
+            exit 1
+          fi
+
+          # Trim any trailing slash so we don't build a double-slash URL.
+          BASE="${SUPABASE_URL%/}"
+          ENDPOINT="${BASE}/auth/v1/health"
+
+          echo "Pinging ${ENDPOINT}"
+          # 5 attempts, 15s apart — transient blips shouldn't flag a false red.
+          HTTP_CODE=$(curl -sS -o /tmp/sb-body.txt -w '%{http_code}' \
+            --fail-with-body --retry 5 --retry-delay 15 --retry-all-errors \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            "${ENDPOINT}") || {
+              echo "::error::Ping failed with HTTP ${HTTP_CODE}."
+              echo "--- response body ---"
+              cat /tmp/sb-body.txt || true
+              exit 1
+            }
+
+          echo "HTTP ${HTTP_CODE} — project is active."
