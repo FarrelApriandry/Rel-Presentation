@@ -121,14 +121,14 @@ export function buildDocumentsSection(documents: PromptDocument[]): string {
 
   const blocks = documents.map((doc, idx) => {
     const name = (doc.name || `Document ${idx + 1}`).replace(/[\n\r]/g, ' ').trim();
-    return `### Dokumen referensi ${idx + 1}: ${name}\n<doc>\n${doc.text}\n</doc>`;
+    return `### Reference document ${idx + 1}: ${name}\n<doc>\n${doc.text}\n</doc>`;
   });
 
   return (
-    '\n\nBerikut adalah dokumen referensi yang diunggah oleh presenter. ' +
-    'Gunakan isi dokumen sebagai sumber utama fakta, data, dan narasi presentasi. ' +
-    'Jangan mengarang fakta di luar dokumen; jika topik meminta keluaran di luar dokumen, ' +
-    'gunakan dokumen sebagai konteks utama dan sisanya sebagai pendukung umum.\n' +
+    '\n\nThe following reference documents were uploaded by the presenter. ' +
+    'Use the document contents as the primary source of facts, data, and narrative for the presentation. ' +
+    'Do not invent facts outside the documents; if the topic requires material beyond them, ' +
+    'treat the documents as the main context and everything else as general supporting material.\n' +
     blocks.join('\n\n')
   );
 }
