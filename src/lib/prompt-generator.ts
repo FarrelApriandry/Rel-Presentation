@@ -1,6 +1,7 @@
 /* ── Presentation Prompt Generator ── */
 
 import { type PromptDocument, buildDocumentsSection } from './prompt-documents';
+import { buildStyleSection } from './style-presets';
 
 export interface PromptImage {
   url: string;
@@ -136,6 +137,7 @@ export function generatePresentationPrompt(data: PresentationFormData): string {
   const language = resolveLanguage(data);
   const purpose = resolveLabel(PURPOSE_OPTIONS, data.purpose).toLowerCase();
   const visualStyle = resolveVisualStyle(data);
+  const styleSection = buildStyleSection(data.visualStyle, data.customVisualStyle);
   const contentDepth = describeContentDepth(data.contentDetail);
   const slideCount = data.slideCount > 0 ? data.slideCount : 12;
 
@@ -158,7 +160,7 @@ export function generatePresentationPrompt(data: PresentationFormData): string {
   const documentsSection = buildDocumentsSection(usableDocs);
 
   const imagesSection = usableImages.length
-    ? "\n\ndetail gambar yang bisa digunakan:\n" +
+    ? "\n\nReference images available for use:\n" +
       usableImages
         .map((img, idx) => {
           const rawDesc = (img.description || '').trim() || (img.name || '').trim() || ("Reference image " + (idx + 1));
@@ -177,7 +179,7 @@ The presentation should contain ${slideCount} slides. ${structureSection}
 
 The target audience is ${audience}. The presentation is intended as a ${purpose}. Use **${language}** as the primary language for all content, labels, and text.
 
-For the visual direction, adopt a **${visualStyle}** aesthetic. The design should feel intentionally crafted — not templated or generic.${specialSection}
+For the visual direction, adopt a **${visualStyle}** aesthetic. The design should feel intentionally crafted — not templated or generic.${styleSection}${specialSection}
 
 Content depth and narrative quality:
 ${contentDepth}${documentsSection}
